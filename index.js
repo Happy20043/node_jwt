@@ -2,6 +2,8 @@ import bodyParser from "body-parser";
 import express from "express";
 import DbConnect from "./middleware/dbConnect.js";
 import serverRoutes from "./routes/serverRoutes.js";
+import jwt from "jsonwebtoken";
+
 
 const app = express();
 

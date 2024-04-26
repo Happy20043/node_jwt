@@ -1,10 +1,29 @@
 import express from "express";
-import { createUser, getUser, updateUser } from "../controller/user.js";
+import {
+  createUser,
+  deleteUser,
+  getUser,
+  updateUser,
+} from "../controller/user.js";
 import { Router } from "express";
+import jwt from "jsonwebtoken";
 
 const router = Router();
+const auth = (req, res, next) => {
+  const token = req?.get("Authorization")?.split("Bearer ")[1];
+  try {
+    var decoded = jwt.verify(token, "shhhhh");
+    console.log(decoded);
+    // If token is valid, attach the decoded user information to the request object
+    req.user = decoded;
+    next(); // Call next middleware
+  } catch (error) {
+    console.log(error);
+    res.status(401).json({ error: "Unauthorized" });
+  }
+};
 
-router.get("/", async (req, res) => {
+router.get("/", auth, async (req, res) => {
   try {
     const userData = await getUser(req.query);
     res.send(userData);
@@ -13,9 +32,12 @@ router.get("/", async (req, res) => {
     res.json(error.message);
   }
 });
+
 router.post("/", async (req, res) => {
   try {
     const userData = await createUser(req.body);
+    var token = jwt.sign({ email: req?.body?.email }, "shhhhh");
+    console.log(token);
     res.send(userData);
   } catch (error) {
     console.log(error);
@@ -23,7 +45,7 @@ router.post("/", async (req, res) => {
   }
 });
 router.put("/:id", async (req, res) => {
-    console.log( req.body)
+  console.log(req.body);
   try {
     const userData = await updateUser(req.params.id, req.body);
     res.send(userData);
@@ -34,7 +56,7 @@ router.put("/:id", async (req, res) => {
 });
 router.delete("/:id", async (req, res) => {
   try {
-    const userData = await createUser(req.params.id, req.body);
+    const userData = await deleteUser(req.params.id, req.body);
     res.send({ userData, message: "delete successfully" });
   } catch (error) {
     console.log(error);
