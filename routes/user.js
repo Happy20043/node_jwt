@@ -7,6 +7,7 @@ import {
 } from "../controller/user.js";
 import { Router } from "express";
 import jwt from "jsonwebtoken";
+import { authenticateToken } from "../middleware/authMiddleware.js";
 
 const router = Router();
 const auth = (req, res, next) => {
@@ -23,7 +24,8 @@ const auth = (req, res, next) => {
   }
 };
 
-router.get("/", auth, async (req, res) => {
+// router.get("/", auth, async (req, res) => {
+router.get("/", authenticateToken, async (req, res) => {
   try {
     const userData = await getUser(req.query);
     res.send(userData);
@@ -33,17 +35,18 @@ router.get("/", auth, async (req, res) => {
   }
 });
 
-router.post("/", async (req, res) => {
-  try {
-    const userData = await createUser(req.body);
-    var token = jwt.sign({ email: req?.body?.email }, "shhhhh");
-    console.log(token);
-    res.send(userData);
-  } catch (error) {
-    console.log(error);
-    res.json(error.message);
-  }
-});
+// router.post("/", async (req, res) => {
+//   try {
+//     const userData = await createUser(req.body);
+//     var token = jwt.sign({ email: req?.body?.email }, "shhhhh");
+//     console.log(token);
+//     res.send(userData);
+//   } catch (error) {
+//     console.log(error);
+//     res.json(error.message);
+//   }
+// });
+
 router.put("/:id", async (req, res) => {
   console.log(req.body);
   try {

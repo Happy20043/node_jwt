@@ -6,7 +6,7 @@ import jwt from "jsonwebtoken";
 
 
 const app = express();
-
+app.use(express.json());
 app.use(DbConnect);
 app.use(bodyParser.json());
 app.use("/", (req, res, next) => {
