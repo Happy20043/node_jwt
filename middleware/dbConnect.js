@@ -1,21 +1,17 @@
 import mongoose from "mongoose";
 
-const DbConnect = async (req, res, next) => {
+const DbConnect = async () => {
+  mongoose.set('strictQuery', false);
   try {
-    await mongoose.connect(
-      "mongodb+srv://happy2004:2004%40happy@cluster0.twa8tfa.mongodb.net",
-      {
-        dbName: "ecommerceDatabase",
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-      }
-    );
-    console.log("Connected to MongoDB");
-    next();
-  } catch (error) {
-    console.error("Error connecting to MongoDB:", error);
-    next(error);
+    await mongoose.connect(`${process.env.MONGO_URI}/happy`, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log("MongoDB connected!");
+  } catch (err) {
+    console.error(err.message);
+    process.exit(1);
   }
 };
 
-export default DbConnect;
+export default DbConnect 
