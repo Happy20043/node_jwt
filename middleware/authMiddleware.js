@@ -1,22 +1,24 @@
-import fs from 'fs';
-import jwt from 'jsonwebtoken';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import jwt from "jsonwebtoken";
 
-const dirname = path.dirname(fileURLToPath(import.meta.url));
-const privateKey = fs.readFileSync(
-  path.resolve(dirname, "../private.key"),
-  "utf-8"
-);
+const authMiddleware = (req, res, next) => {
+  const authHeader = req.headers.authorization;
 
-export const authenticateToken = (req, res, next) => {
-    const authHeader = req.get('Authorization');
-    const token = authHeader && authHeader.split('Bearer ')[1];
-    if (token == null) return res.sendStatus(401);
-  
-    jwt.verify(token, privateKey, (err, user) => {
-      if (err) return res.sendStatus(403);
-      req.user = user;
-      next();
-    });
-  };
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json({ message: "Access denied. No token provided." });
+  }
+
+  const token = authHeader.split(" ")[1]; 
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    req.user = decoded;
+
+    next();
+  } catch (err) {
+    console.error("Token verification failed:", err.message);
+    return res.status(403).json({ message: "Invalid token." });
+  }
+};
+
+export default authMiddleware;
