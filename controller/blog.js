@@ -28,8 +28,20 @@ export const CreateBlog = async (req, res) => {
 
 export const getBlog = async (req, res) => {
   try {
-    const blogs = await Blog.find();
-    res.status(200).json(blogs);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const blogs = await Blog.find().skip(skip).limit(limit);
+
+    const totalBlogs = await Blog.countDocuments();
+
+    res.status(200).json({
+      page,
+      totalPages: Math.ceil(totalBlogs / limit),
+      totalBlogs,
+      blogs,
+    });
   } catch (err) {
     res
       .status(500)
